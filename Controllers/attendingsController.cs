@@ -11,7 +11,7 @@ namespace locationRecordeapi.Data
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class attendingsController : ControllerBase
+    public class attendingsController : Controller
     {
         private readonly locationRecordeapiContext _context;
 
@@ -24,6 +24,7 @@ namespace locationRecordeapi.Data
         [HttpGet]
         public async Task<ActionResult<IEnumerable<attendings>>> Getattendings()
         {
+           //ViewBag._aList =  await _context.attendings.ToListAsync();
             return await _context.attendings.ToListAsync();
         }
 

@@ -25,8 +25,13 @@ namespace locationRecordeapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Emplyees>>> GetEmplyees()
         {
+            try { 
             return await _context.Emplyees.ToListAsync();
-        }
+            }catch(Exception e)
+            {
+                return new List<Emplyees>();
+            }
+            }
 
         // GET: api/Emplyees/5
         [HttpGet("{id}")]
