@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using locationRecordeapi;
 using locationRecordeapi.Data;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace locationRecordeapi.Controllers
 {
@@ -98,6 +100,12 @@ namespace locationRecordeapi.Controllers
         [HttpPost]
         public async Task<ActionResult<Emplyees>> PostEmplyees(Emplyees emplyees)
         {
+            if(string.IsNullOrEmpty(emplyees.password.Trim()))
+            {
+                return NoContent();
+            }
+            emplyees.password = Encrypt(emplyees.password);
+            
             _context.Emplyees.Add(emplyees);
             await _context.SaveChangesAsync();
 
@@ -123,6 +131,17 @@ namespace locationRecordeapi.Controllers
         private bool EmplyeesExists(int id)
         {
             return _context.Emplyees.Any(e => e.id == id);
+        }
+
+
+        static string Encrypt(string pass)
+        {
+            using(MD5 md5 = MD5.Create())
+            {
+                UTF8Encoding utf8 = new UTF8Encoding();
+                byte[] data = md5.ComputeHash(utf8.GetBytes(pass));
+                return Convert.ToBase64String(data);
+            }
         }
     }
 }

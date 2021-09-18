@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>857b68dc-e994-4a93-83f5-8e7dee9c617b</UserSecretsId>
+    <!--<UserSecretsId>857b68dc-e994-4a93-83f5-8e7dee9c617b</UserSecretsId>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
-    <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>
+    <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>-->
   </PropertyGroup>
 
   <ItemGroup>

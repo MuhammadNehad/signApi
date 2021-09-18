@@ -15,6 +15,7 @@ namespace locationRecordeapi
         public string empCode { set; get; }
         public string email { set; get; }
         public string name { set; get; }
+        public string password { set; get; }
         public string phone { set; get; }
         [ForeignKey("EmpsLocation")]
         public int? locationKey { set; get; }

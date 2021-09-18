@@ -24,5 +24,8 @@ namespace locationRecordeapi.Data
         {
             modelBuilder.Entity<Emps_Locs_View>().HasNoKey().ToView("Emps_Locs_View");
         }
+        public DbSet<locationRecordeapi.roles> roles { get; set; }
+        public DbSet<locationRecordeapi.Permissions> Permissions { get; set; }
+        public DbSet<locationRecordeapi.roles_perms_rel> roles_perms_rel { get; set; }
     }
 }
