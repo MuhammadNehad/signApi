@@ -78,11 +78,29 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<roles_perms_rel>> Postroles_perms_rel(roles_perms_rel roles_perms_rel)
+        public async Task<ActionResult<roles_perms_rel>> Postroles_perms_rel([FromForm] roles_perms_rel roles_perms_rel)
         {
-            _context.roles_perms_rel.Add(roles_perms_rel);
-            await _context.SaveChangesAsync();
+            int existScalar= _context.roles_perms_rel.Where(rpr => rpr.perm_id == roles_perms_rel.perm_id && rpr.role_id == roles_perms_rel.role_id).Count();
+            if(existScalar>0)
+            {
+                return StatusCode(500, new { failed = "can't Save Permission to same user twice" });                     
+            }
+            if(!ModelState.IsValid)
+            {
+                throw new Exception("Not Valid");
+            }
+            //roles_perms_rel.role = await _context.roles.FindAsync(roles_perms_rel.role_id);
+            try {
+                if (await _context.roles.FindAsync(roles_perms_rel.role_id) != null) { 
+                await _context.roles_perms_rel.AddAsync(roles_perms_rel);
+                await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
 
+                    throw;
+            }
             return CreatedAtAction("Getroles_perms_rel", new { id = roles_perms_rel.id }, roles_perms_rel);
         }
 

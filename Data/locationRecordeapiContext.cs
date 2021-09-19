@@ -23,6 +23,19 @@ namespace locationRecordeapi.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Emps_Locs_View>().HasNoKey().ToView("Emps_Locs_View");
+
+            modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.perm_id, rpr.role_id });
+            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm);
+            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role);
+
+            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role).WithMany(r => r._roles_perms_rel).HasForeignKey(rpr => rpr.role_id).HasConstraintName("FK_role_role_perms");
+            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm).WithMany(p => p._roles_perms_rel).HasForeignKey(rpr => rpr.perm_id);
+
+            modelBuilder.Entity<Emplyees>().HasKey(e => new {e.role});
+
+            modelBuilder.Entity<Emplyees>().HasOne(e => e._role).WithOne(r=>r.emplyees).HasForeignKey<Emplyees>(e=>e.role);
+            //modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.perm_id, rpr.role_id });
+
         }
         public DbSet<locationRecordeapi.roles> roles { get; set; }
         public DbSet<locationRecordeapi.Permissions> Permissions { get; set; }

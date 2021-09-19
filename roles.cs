@@ -12,5 +12,9 @@ namespace locationRecordeapi
         [Key]
         public int Id { set; get; }
         public string name { set; get; }
+
+        public List<roles_perms_rel> _roles_perms_rel { get; set; }
+
+        public Emplyees emplyees { get; set; }
     }
 }

@@ -74,7 +74,7 @@ namespace locationRecordeapi.Controllers
             }
 
             _context.Entry(emplyees).State = EntityState.Modified;
-
+            _context.Entry(emplyees).Property(e => e.password).IsModified = false;
             try
             {
                 await _context.SaveChangesAsync();
@@ -98,7 +98,7 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Emplyees>> PostEmplyees(Emplyees emplyees)
+        public async Task<ActionResult<Emplyees>> PostEmplyees([FromForm]Emplyees emplyees)
         {
             if(string.IsNullOrEmpty(emplyees.password.Trim()))
             {
@@ -112,6 +112,17 @@ namespace locationRecordeapi.Controllers
             return CreatedAtAction("GetEmplyees", new { id = emplyees.id }, emplyees);
         }
 
+        // POST: api/Emplyees/Login
+
+        [HttpGet("[action]/{empCode}/{password}")]
+        public ActionResult<object> Login(string empCode,string password)
+        {
+            string passenc = Encrypt(password);
+            object e = _context.Emplyees.Where(em => em.empCode == empCode && em.password == passenc).Select(e=>new { e.id,e.email,e.empCode,e.locationKey,e.name
+                ,e.phone,e._role }).ToList().First();
+            
+            return StatusCode(200, e);
+        }
         // DELETE: api/Emplyees/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Emplyees>> DeleteEmplyees(int id)
@@ -127,6 +138,7 @@ namespace locationRecordeapi.Controllers
 
             return emplyees;
         }
+
 
         private bool EmplyeesExists(int id)
         {

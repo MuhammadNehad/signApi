@@ -23,9 +23,17 @@ namespace locationRecordeapi.Controllers
 
         // GET: api/roles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<roles>>> Getroles()
+        public async Task<ActionResult<IEnumerable<object>>> Getroles()
         {
-            return await _context.roles.ToListAsync();
+            return  await _context.roles.
+                Select(r=>
+                new { r.Id
+                ,r.name
+                ,
+                    roles_perms = r._roles_perms_rel
+                .Select(rpr =>
+                new {rpr.id,rpr.perm_id,rpr.role_id}
+                ).ToList()}).ToListAsync();
         }
 
         // GET: api/roles/5
@@ -78,7 +86,7 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<roles>> Postroles(roles roles)
+        public async Task<ActionResult<roles>> Postroles([FromForm] roles roles)
         {
             _context.roles.Add(roles);
             await _context.SaveChangesAsync();

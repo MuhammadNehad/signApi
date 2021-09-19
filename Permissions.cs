@@ -10,8 +10,10 @@ namespace locationRecordeapi
     public class Permissions
     {
         [Key]
-        public string Id { set; get; }
+        public int Id { set; get; }
 
         public string name { set; get; }
+        public ICollection<roles_perms_rel> _roles_perms_rel { get; set; }
+
     }
 }

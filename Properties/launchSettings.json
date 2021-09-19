@@ -18,7 +18,7 @@
       "launchBrowser": true,
       "launchUrl": "api/",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Production"
       }
     },
     "locationRecordeapi": {

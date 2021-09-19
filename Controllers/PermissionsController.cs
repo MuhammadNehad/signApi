@@ -25,7 +25,7 @@ namespace locationRecordeapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Permissions>>> GetPermissions()
         {
-            return await _context.Permissions.ToListAsync();
+            return StatusCode(200,await _context.Permissions.ToListAsync());
         }
 
         // GET: api/Permissions/5
@@ -46,7 +46,7 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPermissions(string id, Permissions permissions)
+        public async Task<IActionResult> PutPermissions(int id, Permissions permissions)
         {
             if (id != permissions.Id)
             {
@@ -116,7 +116,7 @@ namespace locationRecordeapi.Controllers
             return permissions;
         }
 
-        private bool PermissionsExists(string id)
+        private bool PermissionsExists(int id)
         {
             return _context.Permissions.Any(e => e.Id == id);
         }

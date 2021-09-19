@@ -19,7 +19,9 @@ namespace locationRecordeapi
         public string phone { set; get; }
         [ForeignKey("EmpsLocation")]
         public int? locationKey { set; get; }
+        public int? role { set; get; }
 
+        public roles _role { get; set; }
 
     }
 }
