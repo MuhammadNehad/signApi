@@ -28,7 +28,7 @@ namespace locationRecordeapi.Controllers
         public async Task<ActionResult<IEnumerable<Emplyees>>> GetEmplyees()
         {
             try { 
-            return await _context.Emplyees.ToListAsync();
+            return await _context.Emplyees.AsNoTracking().ToListAsync();
             }catch(Exception e)
             {
                 return new List<Emplyees>();
@@ -39,8 +39,11 @@ namespace locationRecordeapi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Emplyees>> GetEmplyees(int id)
         {
+            //var emplyees = await _context.Emplyees.SingleAsync(e => e.id == id);
             var emplyees = await _context.Emplyees.FindAsync(id);
 
+            //var emplyees = _context.Emplyees.Where(e=>e.id == id).First();
+            //_context.Entry(emplyees).State = EntityState.Detached;
             if (emplyees == null)
             {
                 return NotFound();
@@ -75,6 +78,37 @@ namespace locationRecordeapi.Controllers
 
             _context.Entry(emplyees).State = EntityState.Modified;
             _context.Entry(emplyees).Property(e => e.password).IsModified = false;
+            _context.Entry(emplyees).Property(e => e.id).IsModified = false;
+            if(emplyees.email == null)
+            { 
+
+            _context.Entry(emplyees).Property(e => e.email).IsModified = false;
+
+            }
+            if (emplyees.phone == null)
+            {
+
+                _context.Entry(emplyees).Property(e => e.phone).IsModified = false;
+
+            }
+            if (emplyees.role == null)
+            {
+
+                _context.Entry(emplyees).Property(e => e.role).IsModified = false;
+
+            }
+            if (emplyees.locationKey == null)
+            {
+
+                _context.Entry(emplyees).Property(e => e.locationKey).IsModified = false;
+
+            }
+            if (emplyees.name == null)
+            {
+
+                _context.Entry(emplyees).Property(e => e.name).IsModified = false;
+
+            }
             try
             {
                 await _context.SaveChangesAsync();

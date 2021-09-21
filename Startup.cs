@@ -31,18 +31,23 @@ namespace locationRecordeapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string conn = Configuration.GetConnectionString("locationRecordeapiContext");
+            if (conn.Contains("%CONTENTROOTPATH%"))
+            {
+                conn = conn.Replace("%CONTENTROOTPATH%", Environment.CurrentDirectory);
+            }
             services.AddCors();
             services.AddControllers(options =>
             {
                 options.OutputFormatters.RemoveType<SystemTextJsonOutputFormatter>();
                 options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(new JsonSerializerOptions(JsonSerializerDefaults.Web)
                 {
-                    ReferenceHandler = ReferenceHandler.Preserve,
+                    //ReferenceHandler = ReferenceHandler.Preserve,
                 }));
             });
 
             services.AddDbContext<locationRecordeapiContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("locationRecordeapiContext")));
+                    options.UseSqlServer(conn));
 
 //            services.AddDbContext<locationRecordeapiContext>(options =>
   //                  options.UseSqlServer(Configuration.GetConnectionString("locationRecordeapiContext")));
