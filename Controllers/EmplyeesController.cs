@@ -65,6 +65,22 @@ namespace locationRecordeapi.Controllers
 
             return emplyees;
         }
+
+        // GET: api/Emplyees/+223111
+        [HttpGet("[action]")]
+        public ActionResult<object> GetEmplyeesWithattendings()
+        {
+            object emplyees = _context.Emplyees.Select(e=>new {e.email,e.empCode,e.locationKey,e.name,e.phone,mrole= _context.roles.Where(rs=>rs.Id == e.role).First(),mAttendings
+            = _context.attendings.Where(at => at.atdt.Date == DateTime.Now.Date && at.empKey == e.id).ToList()
+            }).ToList();
+
+            if (emplyees == null)
+            {
+                return NotFound();
+            }
+
+            return emplyees;
+        }
         // PUT: api/Emplyees/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -153,7 +169,19 @@ namespace locationRecordeapi.Controllers
         {
             string passenc = Encrypt(password);
             object e = _context.Emplyees.Where(em => em.empCode == empCode && em.password == passenc).Select(e=>new { e.id,e.email,e.empCode,e.locationKey,e.name
-                ,e.phone,e._role }).ToList().First();
+                ,e.phone,
+                mrole= _context.roles.Where(r=>r.Id ==e.role).Select(r=> new {
+                    r.Id,r.name,
+                    roles_perms_rel = _context.roles_perms_rel.Where(rpr => rpr.role_id == r.Id).Select(rpr => new
+                    {
+                        rpr.id,
+                        rpr.perm_id,
+                        rpr.role_id,
+                        rpr.perm
+                    }).ToList()
+                }).ToList() ,
+
+            }).ToList().First();
             
             return StatusCode(200, e);
         }

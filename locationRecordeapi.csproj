@@ -5,10 +5,14 @@
     <!--<UserSecretsId>857b68dc-e994-4a93-83f5-8e7dee9c617b</UserSecretsId>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModuleV2</AspNetCoreModuleName>-->
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Data\locationRecordeapiContext-75911b24-30a0-499a-972f-3938d14dca8c_log.ldf" />
+    <None Remove="Data\Sign.ldf" />
+    <None Remove="Data\Sign.mdf" />
   </ItemGroup>
 
   <ItemGroup>

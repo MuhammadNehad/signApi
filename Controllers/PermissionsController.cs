@@ -30,7 +30,7 @@ namespace locationRecordeapi.Controllers
 
         // GET: api/Permissions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Permissions>> GetPermissions(string id)
+        public async Task<ActionResult<Permissions>> GetPermissions(int id)
         {
             var permissions = await _context.Permissions.FindAsync(id);
 

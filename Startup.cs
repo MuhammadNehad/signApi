@@ -47,7 +47,7 @@ namespace locationRecordeapi
             });
 
             services.AddDbContext<locationRecordeapiContext>(options =>
-                    options.UseSqlServer(conn));
+                    options.UseSqlServer(conn, options => options.EnableRetryOnFailure()));
 
 //            services.AddDbContext<locationRecordeapiContext>(options =>
   //                  options.UseSqlServer(Configuration.GetConnectionString("locationRecordeapiContext")));
