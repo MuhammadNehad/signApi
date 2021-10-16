@@ -13,7 +13,6 @@ namespace locationRecordeapi
     {
         [Key]
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public int id { set; get; }
         

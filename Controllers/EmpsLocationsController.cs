@@ -23,9 +23,13 @@ namespace locationRecordeapi.Controllers
 
         // GET: api/EmpsLocations
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<EmpsLocation>>> GetEmpsLocation()
+        public async Task<ActionResult<IEnumerable<EmpsLocation>>> GetEmpsLocation([FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
-            return await _context.EmpsLocation.ToListAsync();
+            if (!EmplyeesController.checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
+            return StatusCode(200, await _context.EmpsLocation.ToListAsync());
         }
 
         // GET: api/EmpsLocations/5
@@ -58,8 +62,12 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmpsLocation(int id, [FromForm] EmpsLocation empsLocation)
+        public async Task<IActionResult> PutEmpsLocation(int id, [FromForm] EmpsLocation empsLocation, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!EmplyeesController.checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
             if (id != empsLocation.Id)
             {
                 return BadRequest();
@@ -83,15 +91,19 @@ namespace locationRecordeapi.Controllers
                 }
             }
 
-            return NoContent();
+            return StatusCode(200,new { status= 200 });
         }
 
         // POST: api/EmpsLocations
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<EmpsLocation>> PostEmpsLocation([FromForm] EmpsLocation empsLocation)
+        public async Task<ActionResult<EmpsLocation>> PostEmpsLocation([FromForm] EmpsLocation empsLocation,[FromQuery]Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!EmplyeesController.checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
             _context.EmpsLocation.Add(empsLocation);
             await _context.SaveChangesAsync();
 

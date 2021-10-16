@@ -42,6 +42,26 @@ namespace locationRecordeapi.Controllers
             return permissions;
         }
 
+
+        [HttpGet("[action]")]
+        public ActionResult<List<int>> getByName([FromQuery] string[] permsNames)
+        {
+            List<int> permsList = new List<int>();
+
+            foreach (string perm in permsNames)
+            {
+                int? permissions = _context.Permissions.Where(per => per.name == perm).Select(per=> per.Id).FirstOrDefault();
+                if (permissions == null)
+                {
+                    return StatusCode(400,new { status=400,message="one or more Permissions are not valid."});
+                }
+                permsList.Add((int)permissions);
+            }
+
+
+            return StatusCode(200, new { status= 200 ,permsL=permsList});
+        }
+
         // PUT: api/Permissions/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.

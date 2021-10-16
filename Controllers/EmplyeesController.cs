@@ -25,10 +25,14 @@ namespace locationRecordeapi.Controllers
 
         // GET: api/Emplyees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Emplyees>>> GetEmplyees()
+        public async Task<ActionResult<IEnumerable<Emplyees>>> GetEmplyees([FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
-            try { 
-            return await _context.Emplyees.AsNoTracking().ToListAsync();
+            try {
+                if (!checkValidations(_context, curEmp, permsid))
+                {
+                    return StatusCode(400, "check you are registered or have permission");
+                }
+                return await _context.Emplyees.AsNoTracking().ToListAsync();
             }catch(Exception e)
             {
                 return new List<Emplyees>();
@@ -37,8 +41,12 @@ namespace locationRecordeapi.Controllers
 
         // GET: api/Emplyees/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Emplyees>> GetEmplyees(int id)
+        public async Task<ActionResult<Emplyees>> GetEmplyees(int id, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
             //var emplyees = await _context.Emplyees.SingleAsync(e => e.id == id);
             var emplyees = await _context.Emplyees.FindAsync(id);
 
@@ -66,12 +74,21 @@ namespace locationRecordeapi.Controllers
             return emplyees;
         }
 
+
         // GET: api/Emplyees/+223111
         [HttpGet("[action]")]
-        public ActionResult<object> GetEmplyeesWithattendings()
+        public ActionResult<object> GetEmplyeesWithattendings([FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
-            object emplyees = _context.Emplyees.Select(e=>new {e.email,e.empCode,e.locationKey,e.name,e.phone,mrole= _context.roles.Where(rs=>rs.Id == e.role).First(),mAttendings
-            = _context.attendings.Where(at => at.atdt.Date == DateTime.Now.Date && at.empKey == e.id).ToList()
+            if(!checkValidations(_context,curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
+
+            object emplyees = _context.Emplyees.Select(e=>new {e.id,e.email,e.empCode,e.locationKey,e.name,e.phone,mrole= _context.roles.Where(rs=>rs.Id == e.role).First(),mAttendings
+            = _context.attendings.Where(at => at.atdt.Date == DateTime.Now.Date && at.empKey == e.id)
+            .Select(at=>new { at.Id,at.empKey,at.entering,at.atdt,at.locationKey,at.leaveAfter,location=_context.EmpsLocation.Where(loc=>loc.Id==at.locationKey)
+            .FirstOrDefault()}).ToList()
+           
             }).ToList();
 
             if (emplyees == null)
@@ -79,14 +96,19 @@ namespace locationRecordeapi.Controllers
                 return NotFound();
             }
 
-            return emplyees;
+            return StatusCode(200, emplyees );
         }
         // PUT: api/Emplyees/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEmplyees(int id,[FromForm] Emplyees emplyees)
+        public async Task<IActionResult> PutEmplyees(int id,[FromForm] Emplyees emplyees, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
+
             if (id != emplyees.id)
             {
                 return BadRequest();
@@ -148,9 +170,14 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Emplyees>> PostEmplyees([FromForm]Emplyees emplyees)
+        public async Task<ActionResult<Emplyees>> PostEmplyees([FromForm]Emplyees emplyees, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
-            if(string.IsNullOrEmpty(emplyees.password.Trim()))
+            if (!checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
+
+            if (string.IsNullOrEmpty(emplyees.password.Trim()))
             {
                 return NoContent();
             }
@@ -187,8 +214,13 @@ namespace locationRecordeapi.Controllers
         }
         // DELETE: api/Emplyees/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Emplyees>> DeleteEmplyees(int id)
+        public async Task<ActionResult<Emplyees>> DeleteEmplyees(int id, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
+
             var emplyees = await _context.Emplyees.FindAsync(id);
             if (emplyees == null)
             {
@@ -207,7 +239,32 @@ namespace locationRecordeapi.Controllers
             return _context.Emplyees.Any(e => e.id == id);
         }
 
+        public static bool checkValidations(locationRecordeapiContext context , Emplyees curEmp ,  int[] permsid)
+        {
+            Emplyees emp = context.Emplyees.Where(em => em.id == curEmp.id && em.empCode == curEmp.empCode).FirstOrDefault();
+            if (emp == null)
+            { return false; }
+            roles role = context.roles.Where(ro => ro.Id == emp.role).FirstOrDefault();
+            if (role == null)
+            {
+                return false;
+            }
 
+            List<roles_perms_rel> perm = context.roles_perms_rel.Where(rpr => rpr.role_id == role.Id).ToList();
+            if (perm.Count() <= 0)
+            {
+                return false;
+
+            }
+            List<int> permsValidIds = perm.Select(rpr => rpr.perm_id).ToList();
+
+            if (permsid.Except(permsValidIds).Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
         static string Encrypt(string pass)
         {
             using(MD5 md5 = MD5.Create())

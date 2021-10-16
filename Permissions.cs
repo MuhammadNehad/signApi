@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 namespace locationRecordeapi
 {
     [Table("permissions")]
@@ -13,6 +15,7 @@ namespace locationRecordeapi
         public int Id { set; get; }
 
         public string name { set; get; }
+        [JsonIgnore]
         public ICollection<roles_perms_rel> _roles_perms_rel { get; set; }
 
     }
