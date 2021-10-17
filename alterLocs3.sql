@@ -60,7 +60,7 @@ PRINT N'Altering Table [dbo].[EmpsLocation]...';
 
 GO
 ALTER TABLE [dbo].[EmpsLocation]
-    ADD [isParent] TINYINT NULL;
+    ADD [isParent] BIT NULL;
 
 
 GO
