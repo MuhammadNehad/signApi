@@ -29,8 +29,9 @@ namespace locationRecordeapi.Controllers
                 Select(r=>
                 new { r.Id
                 ,r.name
+                ,r.proleId
                 ,
-                    roles_perms = r._roles_perms_rel
+                    roles_perms = _context.roles_perms_rel.Where(ropre=>ropre.role_id==r.Id)
                 .Select(rpr =>
                 new {rpr.id,rpr.perm_id,rpr.role_id}
                 ).ToList()}).ToListAsync();
@@ -54,14 +55,24 @@ namespace locationRecordeapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> Putroles(int id, roles roles)
+        public async Task<IActionResult> Putroles(int id,[FromForm] roles roles, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!EmplyeesController.checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
             if (id != roles.Id)
             {
                 return BadRequest();
             }
 
             _context.Entry(roles).State = EntityState.Modified;
+            _context.Entry(roles).Property(e => e.Id).IsModified = false;
+            if (String.IsNullOrWhiteSpace(roles.name))
+            {
+                _context.Entry(roles).Property(e => e.name).IsModified = false;
+
+            }
 
             try
             {

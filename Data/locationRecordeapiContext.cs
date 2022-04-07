@@ -25,18 +25,18 @@ namespace locationRecordeapi.Data
             modelBuilder.Entity<Emps_Locs_View>().HasNoKey().ToView("Emps_Locs_View");
 
             modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.id });
-            //modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.perm_id,rpr.role_id });
-            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role);
-            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm);
-            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role).WithMany(r => r._roles_perms_rel).HasForeignKey(rpr => rpr.role_id).HasConstraintName("FK_role_role_perms");
-            modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm).WithMany(p => p._roles_perms_rel).HasForeignKey(rpr => rpr.perm_id);
+            ////modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.perm_id,rpr.role_id });
+            ////modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role);
+            ////modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm);
+            //modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.role).WithMany(r => r._roles_perms_rel).HasForeignKey(rpr => rpr.role_id).HasConstraintName("FK_role_role_perms");
+            //modelBuilder.Entity<roles_perms_rel>().HasOne(rpr => rpr.perm).WithMany(p => p._roles_perms_rel).HasForeignKey(rpr => rpr.perm_id);
 
             modelBuilder.Entity<Emplyees>().HasKey(e => new {e.id});
 
-            modelBuilder.Entity<Emplyees>().HasOne(e => e._role).WithOne(r=>r.emplyees).HasForeignKey<Emplyees>(e=>e.role);
+            //modelBuilder.Entity<Emplyees>().HasOne(e => e._role).WithOne(r=>r.emplyees).HasForeignKey<Emplyees>(e=>e.role);
             modelBuilder.Entity<roles>().HasKey(r => new { r.Id });
 
-            //modelBuilder.Entity<roles>().HasMany<Permissions>(r => r.perms).WithMany(e => e._roles);
+            //modelBuilder.Entity<roles>().HasMany<roles_perms_rel>(r => r._roles_perms_rel).WithOne(e => e.role);
 
             //modelBuilder.Entity<roles_perms_rel>().HasKey(rpr => new { rpr.perm_id, rpr.role_id });
 
@@ -45,5 +45,6 @@ namespace locationRecordeapi.Data
         public DbSet<locationRecordeapi.Permissions> Permissions { get; set; }
         public DbSet<locationRecordeapi.roles_perms_rel> roles_perms_rel { get; set; }
         public DbSet<locationRecordeapi.trafficLog> trafficLog { get; set; }
+        public DbSet<locationRecordeapi.myKeys> myKeys { get; set; }
     }
 }

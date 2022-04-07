@@ -80,8 +80,8 @@ namespace locationRecordeapi.Controllers
         [HttpPost]
         public async Task<ActionResult<roles_perms_rel>> Postroles_perms_rel([FromForm] roles_perms_rel roles_perms_rel)
         {
-            int existScalar= _context.roles_perms_rel.Where(rpr => rpr.perm_id == roles_perms_rel.perm_id && rpr.role_id == roles_perms_rel.role_id).Count();
-            if(existScalar>0)
+            var existScalar= _context.roles_perms_rel.Where(rpr => rpr.perm_id == roles_perms_rel.perm_id && rpr.role_id == roles_perms_rel.role_id);
+            if(existScalar.Count() > 0)
             {
                 return StatusCode(500, new { failed = "can't Save Permission to same user twice" });                     
             }
@@ -91,12 +91,16 @@ namespace locationRecordeapi.Controllers
             }
             //roles_perms_rel.role = await _context.roles.FindAsync(roles_perms_rel.role_id);
             try {
-                if (await _context.roles.FindAsync(roles_perms_rel.role_id) != null) { 
-                await _context.roles_perms_rel.AddAsync(roles_perms_rel);
-                await _context.SaveChangesAsync();
-                }
+
+                    var resultcheck = _context.roles.Select(ri=>new { ri.Id,ri.name,ri.proleId }).Where(r => r.Id == roles_perms_rel.role_id).FirstOrDefault();
+                    
+                    if (resultcheck != null) { 
+                        await _context.roles_perms_rel.AddAsync(roles_perms_rel);
+                        await _context.SaveChangesAsync();
+                    }
+                
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                     throw;

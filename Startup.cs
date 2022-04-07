@@ -16,6 +16,9 @@ using System.Configuration;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 
 namespace locationRecordeapi
 {
@@ -44,6 +47,7 @@ namespace locationRecordeapi
                 {
                     //ReferenceHandler = ReferenceHandler.Preserve,
                 }));
+
             });
 
             services.AddDbContext<locationRecordeapiContext>(options =>
@@ -72,7 +76,13 @@ namespace locationRecordeapi
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), @"View")),
+                RequestPath = new PathString("/View")
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

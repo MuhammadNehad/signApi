@@ -18,6 +18,7 @@ namespace locationRecordeapi
         public string? ELocaddress { set; get; }
         public double? LocLatitude { set; get; }
         public double? locLngtude { set; get; }
+        public DateTime? dateTime{ set; get; }
         public int? LOCID { set; get; }
         public bool entering { set; get; }
         public Int64 totalHours { set; get; }

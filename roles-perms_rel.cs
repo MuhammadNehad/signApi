@@ -18,11 +18,11 @@ namespace locationRecordeapi
         public int role_id { set; get; }
         public int perm_id { set; get; }
 
-        [JsonIgnore]
-        public Permissions perm { get; set; }
+        //[JsonIgnore]
+        //public Permissions perm { get; set; }
 
-        [JsonIgnore] 
-        public roles role{ get; set; }
+        //[JsonIgnore] 
+        //public roles role{ get; set; }
 
     }
 }

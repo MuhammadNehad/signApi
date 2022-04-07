@@ -30,8 +30,8 @@ namespace locationRecordeapi
         public Nullable<int> locationKey { set; get; }
         [Column("role")]
         public Nullable<int> role { set; get; }
-        [JsonIgnore]
-        public roles _role { get; set; }
+        //[JsonIgnore]
+        //public roles _role { get; set; }
 
     }
 }
