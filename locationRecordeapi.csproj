@@ -12,9 +12,21 @@
 
 
   <ItemGroup>
+    <None Remove="apk\app-release.apk" />
     <None Remove="Data\locationRecordeapiContext-75911b24-30a0-499a-972f-3938d14dca8c_log.ldf" />
     <None Remove="Data\Sign.ldf" />
     <None Remove="Data\Sign.mdf" />
+    <None Remove="View\downloading.html" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Include="apk\app-release.apk">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="View\downloading.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

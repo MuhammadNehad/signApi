@@ -1,0 +1,20 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+        <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+    <a href="http://192.168.1.3:5421/apk/app-release.apk" id="down" download rel="noopener noreferrer">
+        Download File
+    </a>
+    <script>
+        var anchor = document.getElementById('down');
+
+        anchor.click();
+        anchor.remove();
+    </script>
+</body>
+</html>

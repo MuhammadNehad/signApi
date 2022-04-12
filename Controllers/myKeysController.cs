@@ -7,15 +7,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using locationRecordeapi;
 using locationRecordeapi.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace locationRecordeapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class myKeysController : ControllerBase
     {
         private readonly locationRecordeapiContext _context;
-
+        
         public myKeysController(locationRecordeapiContext context)
         {
             _context = context;
@@ -25,8 +29,27 @@ namespace locationRecordeapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<myKeys>>> GetmyKeys()
         {
+
             return await _context.myKeys.ToListAsync();
         }
+
+
+        // GET: api/myKeys
+        [HttpGet("IPAddress")]
+
+        public  ActionResult<String> GetIP()
+        {
+
+
+                myKeys keys = _context.myKeys.FirstOrDefault();
+                return Ok(keys.IPAddress);
+       
+        }
+
+
+
+ 
+
 
         // GET: api/myKeys/5
         [HttpGet("{id}")]
@@ -44,6 +67,7 @@ namespace locationRecordeapi.Controllers
 
         // PUT: api/myKeys/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [AllowAnonymous]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutmyKeys(int id,[FromForm] myKeys myKeys)
         {
@@ -95,6 +119,7 @@ namespace locationRecordeapi.Controllers
 
         // POST: api/myKeys
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<myKeys>> PostmyKeys(myKeys myKeys)
         {

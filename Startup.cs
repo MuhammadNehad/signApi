@@ -19,6 +19,7 @@ using System.Text.Json.Serialization;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace locationRecordeapi
 {
@@ -60,11 +61,17 @@ namespace locationRecordeapi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+
             //ConnectionStringSettings
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+            provider.Mappings[".aab"] = "application/x-authorware-bin";
             app.UseCors(
                     builder => builder
                      .AllowAnyOrigin()
@@ -81,8 +88,17 @@ namespace locationRecordeapi
             {
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), @"View")),
-                RequestPath = new PathString("/View")
+                RequestPath = new PathString("/View"),
+
             });
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                   Path.Combine(Directory.GetCurrentDirectory(), @"apk")),
+                RequestPath = new PathString("/apk"),
+                ContentTypeProvider = provider
+            });
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

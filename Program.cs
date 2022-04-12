@@ -26,6 +26,7 @@ namespace locationRecordeapi
                     .UseContentRoot(Directory.GetCurrentDirectory())
                     .UseIISIntegration()
                     .UseStartup<Startup>();
+
                 });
 
     }

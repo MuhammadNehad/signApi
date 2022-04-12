@@ -341,3 +341,6 @@ healthchecksdb
 
 #db files 
 .sql
+*.apk
+/View/manifest.webmanifest
+/View/geo.html

@@ -105,7 +105,7 @@ namespace locationRecordeapi.Controllers
                     e.phone,
                     e.role,
                     mrole = _context.roles.Where(rs => rs.Id == e.role && rs.proleId == parentId).FirstOrDefault()
-                }).AsEnumerable().Where(emp => (emp.id == ea.empKey && emp.name.Contains(empName) &&emp.mrole != null) ).FirstOrDefault(),
+                }).AsEnumerable().Where(emp => (emp.id == ea.empKey && emp.name.Contains(empName??"") &&emp.mrole != null) ).FirstOrDefault(),
                 location = _context.EmpsLocation.Where(loc => loc.Id == ea.locationKey)
                          .FirstOrDefault()
 
