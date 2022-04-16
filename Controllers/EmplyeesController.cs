@@ -279,9 +279,8 @@ namespace locationRecordeapi.Controllers
                 mm.From = new MailAddress(emailData[0]);
                 mm.To.Add(toEmail);
                 mm.Subject = "Forget password";
-                mm.Body = "Reset Password URL http://62.135.109.243:3232/View/resetPassword.html?code=" + empbase64Code;
+                mm.Body = $"Reset Password URL {ConstantValue.mipaddress}/View/resetPassword.html?code={empbase64Code}" ;
                 mm.IsBodyHtml = false;
-
                 SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
                 smtpClient.Port = 587;
 

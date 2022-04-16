@@ -344,3 +344,4 @@ healthchecksdb
 *.apk
 /View/manifest.webmanifest
 /View/geo.html
+/ConstantValue.cs
