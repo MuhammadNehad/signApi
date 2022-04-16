@@ -46,5 +46,6 @@ namespace locationRecordeapi.Data
         public DbSet<locationRecordeapi.roles_perms_rel> roles_perms_rel { get; set; }
         public DbSet<locationRecordeapi.trafficLog> trafficLog { get; set; }
         public DbSet<locationRecordeapi.myKeys> myKeys { get; set; }
+        public DbSet<locationRecordeapi.EmplyeesAttendings> EmplyeesAttendings { get; set; }
     }
 }

@@ -30,6 +30,9 @@ namespace locationRecordeapi
         public Nullable<int> locationKey { set; get; }
         [Column("role")]
         public Nullable<int> role { set; get; }
+
+        [Column("loggedIn")]
+        public Byte? loggedIn { set; get; }
         //[JsonIgnore]
         //public roles _role { get; set; }
 

@@ -107,8 +107,12 @@ namespace locationRecordeapi.Controllers
 
         // DELETE: api/roles/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<roles>> Deleteroles(int id)
+        public async Task<ActionResult<roles>> Deleteroles(int id, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
+            if (!EmplyeesController.checkValidations(_context, curEmp, permsid))
+            {
+                return StatusCode(400, "check you are registered or have permission");
+            }
             var roles = await _context.roles.FindAsync(id);
             if (roles == null)
             {

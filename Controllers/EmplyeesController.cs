@@ -2,25 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using locationRecordeapi;
 using locationRecordeapi.Data;
 using System.Security.Cryptography;
 using System.Text;
 using System.Net.Mail;
 using System.Net;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authorization;
+using locationRecordeapi.Filters;
+using locationRecordeapi.ApiKeyAuth;
 
 namespace locationRecordeapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[TokenAuthenticationFilter]
+    //[BasicAuthorize]
     public class EmplyeesController : ControllerBase
     {
         private readonly locationRecordeapiContext _context;
-
+        List<int?> inParentsArray = new List<int?>();
         public EmplyeesController(locationRecordeapiContext context)
         {
             _context = context;
@@ -78,7 +81,17 @@ namespace locationRecordeapi.Controllers
         }
 
 
-        // GET: api/Emplyees/+223111
+        /// <summary>
+        /// method <c>GetEmplyeesWithattendings</c> gets Employees data with their attendings  
+        /// </summary>
+        /// <param name="curEmp">receive user who passed data</param>
+        /// <param name="permsid">gets Permissions</param>
+        /// <param name="from">from specific time to search</param>
+        /// <param name="To">to specific time to search</param>
+        /// <param name="empName">used name to search</param>
+        /// <param name="period">specify whether per day ,month or year</param>
+        /// <param name="parentId">passes parent role</param>
+        /// <returns>returns attendings data in object</returns>
         [HttpGet("[action]")]
         public ActionResult<object> GetEmplyeesWithattendings([FromQuery] Emplyees curEmp, [FromQuery] int[] permsid,[FromQuery] DateTime from,[FromQuery]DateTime To,[FromQuery]string empName,[FromQuery] string period,[FromQuery] int parentId)
         {
@@ -87,43 +100,55 @@ namespace locationRecordeapi.Controllers
                 return StatusCode(400, "check you are registered or have permission");
             }
             DateTime currentdt = DateTime.UtcNow.AddHours(2);
-
-
-            var emplyeesAttendings =  _context.attendings.Select(ea => new {
-                ea.Id,
-                ea.atdt,
-                ea.empKey,
-                ea.locationKey,
-                ea.entering,
-                ea.leaveAfter,
-                aemplyee = _context.Emplyees.Select(e => new
+            List<EmplyeesAttendings> attendsList = new List<EmplyeesAttendings>();
+            //loop in attendings table
+            foreach(EmplyeesAttendings eas in _context.EmplyeesAttendings)
+            {
+                if(arole(eas, curEmp.id, parentId))
                 {
-                    e.id,
-                    e.email,
-                    e.empCode,
-                    e.name,
-                    e.phone,
-                    e.role,
-                    mrole = _context.roles.Where(rs => rs.Id == e.role && rs.proleId == parentId).FirstOrDefault()
-                }).AsEnumerable().Where(emp => (emp.id == ea.empKey && emp.name.Contains(empName??"") &&emp.mrole != null) ).FirstOrDefault(),
-                location = _context.EmpsLocation.Where(loc => loc.Id == ea.locationKey)
-                         .FirstOrDefault()
+                    attendsList.Add(eas);
+                }
+            }
 
 
-            }).AsEnumerable().Where(eas=>(eas.atdt >= from && eas.atdt <= To && eas.aemplyee != null)).ToList();
+
+            //var emplyeesAttendings =  _context.attendings.Select(ea => new {
+            //    ea.Id,
+            //    ea.atdt,
+            //    ea.empKey,
+            //    ea.locationKey,
+            //    ea.entering,
+            //    ea.leaveAfter,
+            //    aemplyee = _context.Emplyees.Select(e => new
+            //    {
+            //        e.id,
+            //        e.email,
+            //        e.empCode,
+            //        e.name,
+            //        e.phone,
+            //        e.role,
+            //        mrole = _context.roles.ToList().Where(rs =>
+            //            arole(rs, e.id, e.role ?? -100, curEmp.id, parentId)
+            // ).FirstOrDefault()
+            //    }).AsEnumerable().Where(emp => (emp.id == ea.empKey && emp.name.Contains(empName??"") &&emp.mrole != null) ).FirstOrDefault(),
+            //    location = _context.EmpsLocation.Where(loc => loc.Id == ea.locationKey)
+            //             .FirstOrDefault()
+
+
+            //}).AsEnumerable().Where(eas=>(eas.atdt >= from && eas.atdt <= To && eas.aemplyee != null)).ToList();
             dynamic linqq = null;
 
              if (period == "month")
             {
-                linqq = emplyeesAttendings.GroupBy(g => new { g.atdt.Month, g.empKey });
+                linqq = attendsList.GroupBy(g => new { g.atdt.Month, g.empKey });
             }
             else if (period == "year")
             {
-                linqq = emplyeesAttendings.GroupBy(g => new { g.atdt.Year, g.empKey });
+                linqq = attendsList.GroupBy(g => new { g.atdt.Year, g.empKey });
             }
             else
             {
-                linqq = emplyeesAttendings.GroupBy(g => new { g.atdt.Date, g.empKey });
+                linqq = attendsList.GroupBy(g => new { g.atdt.Date, g.empKey });
 
             }
             //
@@ -136,6 +161,20 @@ namespace locationRecordeapi.Controllers
             return StatusCode(200, linqq);
         }
        
+
+        public bool arole(EmplyeesAttendings eas,int curEmpId,int parentId)
+        {
+            if(eas.parent_id !=null && (eas.parent_id == parentId || inParentsArray.Contains(eas.parent_id)))
+            {
+                inParentsArray.Add(eas.parent_id);
+                return true;
+            }
+            if (eas.aemplyeeId == curEmpId)
+            {
+                return true;
+            }
+            return false;
+        }
         
         // PUT: api/Emplyees/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
@@ -143,11 +182,13 @@ namespace locationRecordeapi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmplyees(int id,[FromForm] Emplyees emplyees, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
         {
-            if (!checkValidations(_context, curEmp, permsid))
-            {
-                return StatusCode(400, "check you are registered or have permission");
+            if(curEmp.id != id)
+            { 
+                if (!checkValidations(_context, curEmp, permsid))
+                {
+                    return StatusCode(400, "check you are registered or have permission");
+                }
             }
-
             if (id != emplyees.id)
             {
                 return BadRequest();
@@ -162,7 +203,7 @@ namespace locationRecordeapi.Controllers
             }
             else
             {
-                emplyees.password = Encrypt(emplyees.password);
+                emplyees.password = AuthenticateController.Encrypt(emplyees.password);
             }
             if (String.IsNullOrWhiteSpace(emplyees.email))
             { 
@@ -192,6 +233,12 @@ namespace locationRecordeapi.Controllers
             {
 
                 _context.Entry(emplyees).Property(e => e.name).IsModified = false;
+
+            }
+            if (emplyees.loggedIn ==null)
+            {
+
+                _context.Entry(emplyees).Property(e => e.loggedIn).IsModified = false;
 
             }
             try
@@ -266,7 +313,7 @@ namespace locationRecordeapi.Controllers
                 }
                 else
                 {
-                    emp.password = Encrypt(resetingDataVal["resetingData"]["password"].ToString());
+                    emp.password = AuthenticateController.Encrypt(resetingDataVal["resetingData"]["password"].ToString());
                     try
                     {
                          _context.SaveChanges();
@@ -298,37 +345,47 @@ namespace locationRecordeapi.Controllers
             {
                 return NoContent();
             }
-            emplyees.password = Encrypt(emplyees.password);
+            emplyees.password = AuthenticateController.Encrypt(emplyees.password);
             
             _context.Emplyees.Add(emplyees);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEmplyees", new { id = emplyees.id }, emplyees);
         }
-
+        [HttpGet("[action]")]
+        public ActionResult signout()
+        {
+            return SignOut();
+        }
+        [HttpGet("[action]/{code}/{pass}")]
+        public ActionResult<object> Login(string code,string pass)
+        {
+            var emplyee = AuthenticateController.checkuserExisted(_context, pass, code);
+            if (emplyee == null)
+            {
+                return NotFound();
+            }
+            return StatusCode(200, emplyee);
+        }
         // POST: api/Emplyees/Login
 
-        [HttpGet("[action]/{empCode}/{password}")]
-        public ActionResult<object> Login(string empCode,string password)
+        [HttpPost("[action]")]
+        [AllowAnonymous]
+        public ActionResult<object> Login(UserLogin userLogin)
         {
-            string passenc = Encrypt(password);
-            object e = _context.Emplyees.Where(em => em.empCode == empCode && em.password == passenc).Select(e=>new { e.id,e.email,e.empCode,e.locationKey,e.name
-                ,e.phone,
-                mrole= _context.roles.Where(r=>r.Id ==e.role).Select(r=> new {
-                    r.Id,r.name,
-                    roles_perms_rel = _context.roles_perms_rel.Where(rpr => rpr.role_id == r.Id).Select(rpr => new
-                    {
-                        rpr.id,
-                        rpr.perm_id,
-                        rpr.role_id,
-                        perm = _context.Permissions.Where(per=>per.Id== rpr.perm_id).FirstOrDefault()
-                    }).ToList()
-                }).ToList() ,
-
-            }).ToList().FirstOrDefault();
-            
-            return StatusCode(200, e);
+            var emplyee =AuthenticateController.checkuserExisted(_context,userLogin.password,userLogin.code);
+            if(emplyee == null)
+            {
+                return NotFound();
+            }
+            return StatusCode(200, emplyee);
         }
+
+
+
+
+
+
         // DELETE: api/Emplyees/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Emplyees>> DeleteEmplyees(int id, [FromQuery] Emplyees curEmp, [FromQuery] int[] permsid)
@@ -395,14 +452,6 @@ namespace locationRecordeapi.Controllers
 
             return true;
         }
-        static string Encrypt(string pass)
-        {
-            using(MD5 md5 = MD5.Create())
-            {
-                UTF8Encoding utf8 = new UTF8Encoding();
-                byte[] data = md5.ComputeHash(utf8.GetBytes(pass));
-                return Convert.ToBase64String(data);
-            }
-        }
+
     }
 }

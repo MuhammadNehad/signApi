@@ -20,6 +20,10 @@ using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using locationRecordeapi.TokenAuthentication;
 
 namespace locationRecordeapi
 {
@@ -40,6 +44,25 @@ namespace locationRecordeapi
             {
                 conn = conn.Replace("%CONTENTROOTPATH%", Environment.CurrentDirectory);
             }
+
+            services.AddSingleton<ITokenManager, TokenManager>();
+
+            services.AddDbContext<locationRecordeapiContext>(options => {
+                options.UseSqlServer(conn, options => options.EnableRetryOnFailure());
+
+
+            });
+            services.AddAuthentication("BasicAuthentication"
+ ).AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthenication", options =>
+            {
+
+            }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, op => {
+                op.LoginPath = new PathString("/Emplyees/Login");
+                op.LogoutPath = new PathString("/Emplyees/signout");
+            }) ;
+            services.AddAuthorization(options => {
+                options.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthenication").RequireAuthenticatedUser().Build());
+            });
             services.AddCors();
             services.AddControllers(options =>
             {
@@ -50,14 +73,29 @@ namespace locationRecordeapi
                 }));
 
             });
+           
 
-            services.AddDbContext<locationRecordeapiContext>(options =>
-                    options.UseSqlServer(conn, options => options.EnableRetryOnFailure()));
 
 //            services.AddDbContext<locationRecordeapiContext>(options =>
   //                  options.UseSqlServer(Configuration.GetConnectionString("locationRecordeapiContext")));
         }
 
+        public static locationRecordeapiContext DBContextMethod()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
+            string conn = configuration.GetConnectionString("locationRecordeapiContext");
+            if (conn.Contains("%CONTENTROOTPATH%"))
+            {
+                conn = conn.Replace("%CONTENTROOTPATH%", Environment.CurrentDirectory);
+            }
+            var OptionsBuilder = new DbContextOptionsBuilder<locationRecordeapiContext>();
+            OptionsBuilder.UseSqlServer(conn);
+            return new locationRecordeapiContext(OptionsBuilder.Options);
+
+        }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -90,7 +128,7 @@ namespace locationRecordeapi
                     Path.Combine(Directory.GetCurrentDirectory(), @"View")),
                 RequestPath = new PathString("/View"),
 
-            });
+            })  ;
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(

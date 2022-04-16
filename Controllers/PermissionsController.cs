@@ -7,11 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using locationRecordeapi;
 using locationRecordeapi.Data;
+using locationRecordeapi.Filters;
 
 namespace locationRecordeapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[TokenAuthenticationFilter]
+
+    //[BasicAuthorize]
     public class PermissionsController : ControllerBase
     {
         private readonly locationRecordeapiContext _context;
@@ -25,7 +29,7 @@ namespace locationRecordeapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Permissions>>> GetPermissions()
         {
-            return StatusCode(200,await _context.Permissions.ToListAsync());
+            return StatusCode(200,await _context.Permissions.Where(perm=>!perm.name.ToLower().Contains("permission") && !perm.name.ToLower().Contains("key")).ToListAsync());
         }
 
         // GET: api/Permissions/5
